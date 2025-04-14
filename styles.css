@@ -6,3 +6,30 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.image-style-rounded-none {
+	border-radius: 0;
+}
+.image-style-rounded-xs {
+	border-radius: 0.125rem;
+}
+.image-style-rounded-sm {
+	border-radius: 0.25rem;
+}
+.image-style-rounded-md {
+	border-radius: 0.375rem;
+}
+.image-style-rounded-lg {
+	border-radius: 0.5rem;
+}
+.image-style-rounded-xl {
+	border-radius: 0.75rem;
+}
+.image-style-rounded-2xl {
+	border-radius: 1rem;
+}
+.image-style-rounded-3xl {
+	border-radius: 1.5rem;
+}
+.image-style-rounded-4xl {
+	border-radius: 2rem;
+}

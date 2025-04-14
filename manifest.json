@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "image-border-style",
+	"name": "Image Border Style",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Border styling for images in Obsidian notes.",
+	"author": "Anurag Shenoy",
+	"authorUrl": "https://www.anuragshenoy.com/",
+	"fundingUrl": "https://buymeacoffee.com/anuragshenoy",
 	"isDesktopOnly": false
 }
