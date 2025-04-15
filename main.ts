@@ -145,9 +145,9 @@ class ImageStyleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		const APP_TITLE = this.plugin.manifest.name + " " + this.plugin.manifest.version
+		// const APP_TITLE = this.plugin.manifest.name + " " + this.plugin.manifest.version
 
-		containerEl.createEl("h1", { text: APP_TITLE })
+		// new Setting(containerEl).setName(APP_TITLE).setHeading();
 
 		new Setting(containerEl)
 			.setName("Rounded Borders")
