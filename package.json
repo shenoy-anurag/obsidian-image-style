@@ -1,7 +1,7 @@
 {
 	"name": "image-border-style",
 	"version": "1.0.0",
-	"description": "Border styling for images in Obsidian notes.",
+	"description": "Border styling for images in markdown notes.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

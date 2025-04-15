@@ -3,7 +3,7 @@
 	"name": "Image Border Style",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Border styling for images in Obsidian notes.",
+	"description": "Border styling for images in markdown notes.",
 	"author": "Anurag Shenoy",
 	"authorUrl": "https://www.anuragshenoy.com/",
 	"fundingUrl": "https://buymeacoffee.com/anuragshenoy",
