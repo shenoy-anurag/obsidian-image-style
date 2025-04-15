@@ -1,7 +1,6 @@
-import { App, MarkdownView, MarkdownPostProcessorContext, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { App, MarkdownPostProcessorContext, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
-// Remember to rename these classes and interfaces!
 
 interface Style {
 	name: string;
@@ -29,7 +28,15 @@ const DEFAULT_SETTINGS: ImageStyleSettings = {
 }
 
 export class ApplyImageBorder implements PluginValue {
-	viewUpdate: ViewUpdate
+	view: EditorView;
+	viewUpdate: ViewUpdate;
+	plugin: ImageStyle;
+
+	constructor(view: EditorView, plugin: ImageStyle) {
+		this.view = view;
+		this.plugin = plugin;
+		// console.log("ApplyImageBorder initialized with plugin settings:", this.plugin.settings);
+	}
 
 	update(update: ViewUpdate) {
 		this.viewUpdate = update
@@ -41,13 +48,18 @@ export class ApplyImageBorder implements PluginValue {
 	}
 
 	applyBorder(img: HTMLImageElement) {
-		const imageBorderRadiusClassName = "image-style-rounded-md"
+		const imageBorderRadiusClassName = "image-style-rounded-" + this.plugin.settings.borderRadius;
 		img.classList.add(imageBorderRadiusClassName);
+	}
+
+	destroy() {
+		// Cleanup logic if needed
 	}
 }
 
 export default class ImageStyle extends Plugin {
 	settings: ImageStyleSettings;
+	observers: MutationObserver[] = [];
 
 	async onload() {
 		await this.loadSettings();
@@ -56,9 +68,9 @@ export default class ImageStyle extends Plugin {
 			this.processImages(el, ctx);
 		});
 
-		this.registerEditorExtension([
-			ViewPlugin.fromClass(ApplyImageBorder),
-		]);
+		this.registerEditorExtension(
+			ViewPlugin.define((view) => new ApplyImageBorder(view, this))
+		);
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -73,31 +85,44 @@ export default class ImageStyle extends Plugin {
 	}
 
 	onunload() {
-
+		this.observers.forEach(observer => observer.disconnect());
+		this.observers = [];
 	}
 
 	processImages(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
-		console.log("processImages", el);
-
-		// Handle regular <img> tags
+		// console.log("processImages", el);
 		const images = el.getElementsByTagName("img");
-		console.log("processImages.images", images);
+		// console.log("processImages.images", images);
 		Array.from(images).forEach((img: HTMLImageElement) => {
-			console.log("processImages.images.src", img.src);
 			this.applyBorder(img);
 		});
 
-		// Handle local images inside "image-embed" containers
-		const imageEmbeds = el.getElementsByClassName("image-embed");
-		// const imageEmbeds = el.querySelectorAll("img");
-		console.log("processImages.imageEmbeds", imageEmbeds);
-		Array.from(imageEmbeds).forEach((imageContainerDiv: HTMLElement) => {
-			const img = imageContainerDiv.children[0] as HTMLImageElement;
-			// const img = imageContainerDiv.querySelector("img");
-			if (img) {
-				this.applyBorder(img);
+		const observer = new MutationObserver((mutationsList, observer) => {
+			for (const mutation of mutationsList) {
+				if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+					mutation.addedNodes.forEach(node => {
+						if (node instanceof HTMLImageElement) {
+							this.applyBorder(node);
+						} else if (node instanceof Element) {
+							const images = node.querySelectorAll('img');
+							images.forEach(this.applyBorder);
+						}
+					});
+				}
 			}
 		});
+
+		observer.observe(el, { childList: true, subtree: true });
+		this.observers.push(observer); // Keep track of observers
+
+		// Return an object with an unload function for cleanup
+		return {
+			unload: () => {
+				observer.disconnect();
+				this.observers = this.observers.filter(obs => obs !== observer);
+				// console.log('MutationObserver disconnected for:', el); // Optional logging
+			},
+		};
 	}
 
 	applyBorder(img: HTMLImageElement) {
