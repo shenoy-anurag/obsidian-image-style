@@ -8,6 +8,11 @@ on:
 env:
   PLUGIN_NAME: image-border-style
 
+permissions:
+  contents: write
+  pull-requests: write
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
