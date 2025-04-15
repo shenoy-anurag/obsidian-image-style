@@ -1,5 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { readFileSync } from "fs";
+import { App, MarkdownView, MarkdownPostProcessorContext, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 // Remember to rename these classes and interfaces!
 
@@ -28,59 +28,38 @@ const DEFAULT_SETTINGS: ImageStyleSettings = {
 	]
 }
 
+export class ApplyImageBorder implements PluginValue {
+	viewUpdate: ViewUpdate
+
+	update(update: ViewUpdate) {
+		this.viewUpdate = update
+
+		const images = update.view.dom.getElementsByTagName("img")
+		Array.from(images).forEach((img: any) => {
+			this.applyBorder(img)
+		})
+	}
+
+	applyBorder(img: HTMLImageElement) {
+		const imageBorderRadiusClassName = "image-style-rounded-md"
+		img.classList.add(imageBorderRadiusClassName);
+	}
+}
+
 export default class ImageStyle extends Plugin {
 	settings: ImageStyleSettings;
 
 	async onload() {
 		await this.loadSettings();
 
-		// const onUpdate = () => {
-		// 	const file = this.app.workspace.getActiveFile()
-		// 	if (file) {
-		// 		const imagesDivs = this.app.workspace.containerEl.getElementsByClassName("image-embed")
-		// 		console.log(imagesDivs)
-		// 		Array.from(imagesDivs).forEach((imageContainerDiv: any) => {
-		// 			const img = imageContainerDiv.children[0]
-		// 			if (img.tagName === "IMG") {
-		// 				const imageBorderRadiusClassName = "image-style-rounded-" + this.settings.borderRadius
-		// 				img.classList.add(imageBorderRadiusClassName)
-		// 			}
-		// 		})
-		// 	}
-		// }
+		this.registerMarkdownPostProcessor((el, ctx) => {
+			this.processImages(el, ctx);
+		});
 
-		// this.app.workspace.on("editor-change", onUpdate)
+		this.registerEditorExtension([
+			ViewPlugin.fromClass(ApplyImageBorder),
+		]);
 
-		// this.app.workspace.onLayoutReady(() => {
-		// 	const file = this.app.workspace.getActiveFile()
-		// 	if (file) {
-		// 		const imagesDivs = this.app.workspace.containerEl.getElementsByClassName("image-embed")
-		// 		console.log(imagesDivs)
-		// 		Array.from(imagesDivs).forEach((imageContainerDiv: any) => {
-		// 			const img = imageContainerDiv.children[0]
-		// 			if (img.tagName === "IMG") {
-		// 				const imageBorderRadiusClassName = "image-style-rounded-" + this.settings.borderRadius
-		// 				img.classList.add(imageBorderRadiusClassName)
-		// 			}
-		// 		})
-		// 	}
-		// })
-
-		const file = this.app.workspace.getActiveFile()
-		if (file) {
-			// const wimages = this.app.workspace.containerEl.getElementsByTagName("img")
-			// console.log(wimages)
-			const images = this.app.workspace.containerEl.getElementsByClassName("image-embed")
-			console.log(images)
-			Array.from(images).forEach((imageContainerDiv: any) => {
-				const img = imageContainerDiv.children[0]
-				if (img.tagName === "IMG") {
-					const imageBorderRadiusClassName = "image-style-rounded-" + this.settings.borderRadius
-					img.classList.add(imageBorderRadiusClassName)
-				}
-			})
-		}
-		
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
@@ -89,32 +68,41 @@ export default class ImageStyle extends Plugin {
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						console.log(checking);
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
-
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new ImageStyleSettingTab(this.app, this));
 	}
 
 	onunload() {
 
+	}
+
+	processImages(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+		console.log("processImages", el);
+
+		// Handle regular <img> tags
+		const images = el.getElementsByTagName("img");
+		console.log("processImages.images", images);
+		Array.from(images).forEach((img: HTMLImageElement) => {
+			console.log("processImages.images.src", img.src);
+			this.applyBorder(img);
+		});
+
+		// Handle local images inside "image-embed" containers
+		const imageEmbeds = el.getElementsByClassName("image-embed");
+		// const imageEmbeds = el.querySelectorAll("img");
+		console.log("processImages.imageEmbeds", imageEmbeds);
+		Array.from(imageEmbeds).forEach((imageContainerDiv: HTMLElement) => {
+			const img = imageContainerDiv.children[0] as HTMLImageElement;
+			// const img = imageContainerDiv.querySelector("img");
+			if (img) {
+				this.applyBorder(img);
+			}
+		});
+	}
+
+	applyBorder(img: HTMLImageElement) {
+		const imageBorderRadiusClassName = "image-style-rounded-" + this.settings.borderRadius
+		img.classList.add(imageBorderRadiusClassName);
 	}
 
 	async loadSettings() {
