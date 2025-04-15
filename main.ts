@@ -1,4 +1,4 @@
-import { App, MarkdownPostProcessorContext, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, MarkdownPostProcessorContext, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 
@@ -71,14 +71,6 @@ export default class ImageStyle extends Plugin {
 		this.registerEditorExtension(
 			ViewPlugin.define((view) => new ApplyImageBorder(view, this))
 		);
-
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new ImageStyleSettingTab(this.app, this));
