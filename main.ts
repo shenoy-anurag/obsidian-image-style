@@ -145,21 +145,17 @@ class ImageStyleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		// const APP_TITLE = this.plugin.manifest.name + " " + this.plugin.manifest.version
-
-		// new Setting(containerEl).setName(APP_TITLE).setHeading();
-
 		new Setting(containerEl)
-			.setName("Rounded Borders")
+			.setName("Rounded borders")
 			.setDesc("Select the border radius of images.")
 			.addDropdown((text) =>
 				text
 					.addOption("none", "No border")
-					.addOption("xs", "Extra Small")
+					.addOption("xs", "Extra small")
 					.addOption("sm", "Small")
 					.addOption("md", "Medium")
 					.addOption("lg", "Large")
-					.addOption("xl", "Extra Large")
+					.addOption("xl", "Extra large")
 					.addOption("2xl", "2XL")
 					.addOption("3xl", "3XL")
 					.addOption("4xl", "4XL")
